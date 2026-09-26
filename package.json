@@ -1,7 +1,8 @@
 {
-  "name": "week14a-nextjs-rag",
-  "version": "0.1.0",
+  "name": "acme-widget-api-rag",
+  "version": "1.0.0",
   "private": true,
+  "description": "Streaming RAG assistant for the Acme Widget API documentation (AIM Graded Mini Project 14.3).",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -21,11 +22,9 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "@types/pdf-parse": "^1.1.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.0",
-    "pdf-parse": "^1.1.1",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
     "tsx": "^4.19.0",
