@@ -5,111 +5,159 @@ import { useChat } from '@ai-sdk/react';
 type Source = { text?: string; source?: string; section?: string; score?: number };
 
 export default function Page() {
-  const { messages, input, handleInputChange, handleSubmit, status, error } = useChat({
+  const { messages, input, setInput, setMessages, handleInputChange, handleSubmit, status, error } = useChat({
     api: '/api/chat',
   });
+  const isBusy = status === 'streaming' || status === 'submitted';
+  const suggestions = [
+    'How does OAuth2 authentication work?',
+    'What limits apply to API keys?',
+    'How should I handle a 429 response?',
+  ];
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Acme Widget API Assistant</h1>
-        <p className="text-sm text-slate-500">
-          Ask about the API and get answers grounded in its documentation.
-        </p>
-      </header>
+    <main className="guide-shell">
+      <aside className="guide-rail" aria-label="Field guide navigation">
+        <a className="brand-lockup" href="#top" aria-label="Acme API Field Guide home">
+          <span className="brand-mark" aria-hidden="true">A</span>
+          <span className="brand-copy">
+            <strong>Field Guide</strong>
+            <small>ACME WIDGET API</small>
+          </span>
+        </a>
 
-      <ul className="space-y-4 mb-6 min-h-[200px]">
-        {messages.length === 0 && (
-          <li className="border-l-4 border-cyan-600 bg-white px-5 py-4 text-sm text-slate-600">
-            <p className="font-semibold text-slate-900">Start with an API question</p>
-            <p className="mt-1">
-              Ask about OAuth2, endpoints, rate limits, error codes, or versioning.
-              Answers include the source file and section; unsupported details are
-              called out instead of guessed.
-            </p>
-            <p className="mt-3 text-slate-500">
-              Example: “How long is an OAuth token valid?”
-            </p>
-          </li>
-        )}
-        {messages.map((m) => (
-          <li
-            key={m.id}
-            className={
-              m.role === 'user'
-                ? 'flex justify-end'
-                : 'flex justify-start flex-col items-start'
-            }
-          >
-            <span
-              className={
-                m.role === 'user'
-                  ? 'inline-block rounded-2xl bg-cyan-600 text-white px-4 py-2 max-w-[85%]'
-                  : 'inline-block rounded-2xl bg-white border border-slate-200 px-4 py-2 max-w-[85%]'
-              }
-            >
-              {m.content}
-            </span>
-
-            {m.role === 'assistant' &&
-              m.toolInvocations?.map(
-                (inv) =>
-                  inv.state === 'result' &&
-                  inv.toolName === 'getInformation' && (
-                    <details
-                      key={inv.toolCallId}
-                      className="mt-2 text-sm text-slate-600 max-w-[85%]"
-                    >
-                      <summary className="cursor-pointer">
-                        Sources ({(inv.result as Source[]).length})
-                      </summary>
-                      <ul className="mt-2 space-y-2">
-                        {(inv.result as Source[]).map((src, i) => (
-                          <li
-                            key={i}
-                            className="border-l-2 border-cyan-500 pl-3"
-                          >
-                            <span className="text-xs text-slate-400">
-                              {src.source ?? 'Unknown source'} · {src.section ?? 'Unlabeled section'} · relevance{' '}
-                              {typeof src.score === 'number'
-                                ? src.score.toFixed(2)
-                                : '—'}
-                            </span>
-                            <p className="whitespace-pre-wrap">{src.text}</p>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  ),
-              )}
-          </li>
-        ))}
-        {status === 'streaming' && (
-          <li className="text-sm text-slate-400">…</li>
-        )}
-        {error && (
-          <li className="text-sm text-rose-600">
-            Error: {error.message}
-          </li>
-        )}
-      </ul>
-
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          value={input}
-          onChange={handleInputChange}
-          className="flex-1 border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500"
-          placeholder="Ask about authentication, rate limits, error codes…"
-          disabled={status === 'streaming' || status === 'submitted'}
-        />
         <button
-          type="submit"
-          disabled={!input || status === 'streaming' || status === 'submitted'}
-          className="rounded-lg bg-slate-900 text-white px-4 py-2 disabled:opacity-40"
+          className="new-chat-button"
+          type="button"
+          onClick={() => {
+            setMessages([]);
+            setInput('');
+          }}
         >
-          Send
+          <span aria-hidden="true">+</span> New conversation
         </button>
-      </form>
+
+        <div className="rail-section">
+          <p className="rail-label">YOUR CORPUS</p>
+          <div className="corpus-entry">
+            <span className="corpus-glyph" aria-hidden="true">R</span>
+            <span>
+              <strong>API Field Guide</strong>
+              <small>11 documents · indexed</small>
+            </span>
+            <span className="ready-dot" aria-label="Index ready" />
+          </div>
+        </div>
+
+        <div className="rail-section recent-section">
+          <p className="rail-label">EXPLORE</p>
+          {suggestions.map((question, index) => (
+            <button
+              className="rail-link"
+              key={question}
+              type="button"
+              onClick={() => setInput(question)}
+            >
+              <span className="rail-link-index">0{index + 1}</span>
+              {['Authentication', 'Rate limits', 'Error handling'][index]}
+            </button>
+          ))}
+        </div>
+
+        <div className="rail-footer">
+          <span className="ready-dot" /> Corpus available
+          <small>Answers cite the source material</small>
+        </div>
+      </aside>
+
+      <section className="guide-workspace" id="top">
+        <header className="workspace-bar">
+          <div className="breadcrumb"><span>REFERENCE DESK</span><b>/</b> API DOCUMENTATION</div>
+          <div className="source-count"><span className="ready-dot" /> 11 SOURCES INDEXED</div>
+        </header>
+
+        <div className="conversation-column">
+          {messages.length === 0 ? (
+            <section className="welcome-panel" aria-labelledby="welcome-title">
+              <div className="welcome-seal" aria-hidden="true"><span>AG</span></div>
+              <p className="eyebrow">A GROUNDED READING COMPANION</p>
+              <h1 id="welcome-title">Ask the <em>field guide.</em></h1>
+              <p className="welcome-copy">
+                Explore your API reference with answers that show their work.
+                Every response is grounded in the documents you chose.
+              </p>
+              <div className="suggestion-list" aria-label="Suggested questions">
+                {suggestions.map((question) => (
+                  <button
+                    className="suggestion-chip"
+                    key={question}
+                    type="button"
+                    onClick={() => setInput(question)}
+                  >
+                    {question}<span aria-hidden="true">↗</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : (
+            <ul className="message-list" aria-live="polite">
+              {messages.map((message) => (
+                <li className={`message-row message-${message.role}`} key={message.id}>
+                  {message.role === 'assistant' && <span className="assistant-mark">AG</span>}
+                  <div className="message-content">
+                    <span className="message-speaker">{message.role === 'user' ? 'YOU' : 'FIELD GUIDE'}</span>
+                    <div className="message-bubble">{message.content}</div>
+                    {message.role === 'assistant' &&
+                      message.toolInvocations?.map(
+                        (invocation) =>
+                          invocation.state === 'result' &&
+                          invocation.toolName === 'getInformation' && (
+                            <details className="source-disclosure" key={invocation.toolCallId}>
+                              <summary>Sources <span>{(invocation.result as Source[]).length}</span></summary>
+                              <ul className="source-list">
+                                {(invocation.result as Source[]).map((source, index) => (
+                                  <li className="source-item" key={`${source.source}-${index}`}>
+                                    <span className="source-meta">
+                                      {source.source ?? 'Unknown source'} <b>/</b> {source.section ?? 'Unlabeled section'}
+                                      <span className="source-score">
+                                        {typeof source.score === 'number' ? source.score.toFixed(2) : '—'}
+                                      </span>
+                                    </span>
+                                    <p>{source.text}</p>
+                                  </li>
+                                ))}
+                              </ul>
+                            </details>
+                          ),
+                      )}
+                  </div>
+                </li>
+              ))}
+              {isBusy && <li className="typing-status"><span /> Consulting the field guide…</li>}
+              {error && <li className="error-message">The request could not be completed: {error.message}</li>}
+            </ul>
+          )}
+
+          {messages.length === 0 && error && <p className="error-message">The request could not be completed: {error.message}</p>}
+
+          <div className="composer-wrap">
+            <form onSubmit={handleSubmit} className="composer">
+              <label className="sr-only" htmlFor="question-input">Ask the field guide</label>
+              <input
+                id="question-input"
+                value={input}
+                onChange={handleInputChange}
+                placeholder="Ask a question about your API corpus…"
+                disabled={isBusy}
+              />
+              <button className="send-button" type="submit" aria-label="Send question" disabled={!input.trim() || isBusy}>
+                <span aria-hidden="true">↑</span>
+              </button>
+            </form>
+            <p className="composer-note">Answers are grounded in the indexed documents <span>·</span> press Enter to send</p>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
