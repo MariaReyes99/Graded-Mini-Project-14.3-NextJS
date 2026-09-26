@@ -11,8 +11,14 @@ import { createOpenAIProvider } from './openai';
 
 const CORPUS_PATH = path.join(process.cwd(), 'data', 'corpus');
 const CORPUS_NAMESPACE = 'acme-widget-api';
+// Chunking is section-based: every Markdown heading starts a new chunk.
+// CHUNK_SIZE only splits a section that is unusually long, with CHUNK_OVERLAP
+// characters repeated between the pieces so no sentence loses its context.
 const CHUNK_SIZE = 3000;
 const CHUNK_OVERLAP = 400;
+// Sections shorter than this (e.g. a lone "Supported methods:" line) are
+// merged into the next section instead of becoming a near-empty chunk.
+const MIN_SECTION_CHARS = 80;
 
 type Chunk = { text: string; source: string; section: string; chunk: number };
 
@@ -40,11 +46,18 @@ function chunkMarkdown(markdown: string, source: string): Chunk[] {
   const chunks: Chunk[] = [];
   let section = path.parse(source).name.replaceAll('_', ' ');
   let lines: string[] = [];
+  let carryOver = '';
 
-  const flushSection = () => {
-    const text = lines.join('\n').trim();
-    if (text) chunks.push(...chunkSection(text, source, section));
+  const flushSection = (isLast = false) => {
+    const text = [carryOver, lines.join('\n').trim()].filter(Boolean).join('\n\n');
     lines = [];
+    if (!text) return;
+    if (text.length < MIN_SECTION_CHARS && !isLast) {
+      carryOver = text;
+      return;
+    }
+    carryOver = '';
+    chunks.push(...chunkSection(text, source, section));
   };
 
   for (const line of markdown.replaceAll('\r\n', '\n').split('\n')) {
@@ -56,7 +69,7 @@ function chunkMarkdown(markdown: string, source: string): Chunk[] {
       lines.push(line);
     }
   }
-  flushSection();
+  flushSection(true);
   return chunks.map((chunk, index) => ({ ...chunk, chunk: index + 1 }));
 }
 
@@ -107,7 +120,7 @@ async function main() {
 
   await index.delete({ prefix: 'acme_' });
   console.log(`Upserting ${records.length} chunks to Upstash Vector…`);
-  // Upstash supports up to 1000 vectors per upsert; chunk if needed.
+  // Upsert in batches to stay well within Upstash request limits.
   const BATCH = 100;
   for (let i = 0; i < records.length; i += BATCH) {
     await index.upsert(records.slice(i, i + BATCH));
@@ -125,7 +138,7 @@ main().catch((error: unknown) => {
   } else if (error instanceof Error) {
     console.error(error.message);
   } else {
-    console.error('Seeding failed. Check the environment configuration and input PDF.');
+    console.error('Seeding failed. Check the environment configuration and the files in data/corpus.');
   }
   process.exit(1);
 });
