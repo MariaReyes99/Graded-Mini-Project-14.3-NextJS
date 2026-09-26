@@ -98,6 +98,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, summary:focus-visibl
 .corpus-entry strong, .corpus-entry small { display: block; }
 .corpus-entry strong { font-size: 12px; font-weight: 650; }
 .corpus-entry small { margin-top: 4px; color: var(--muted); font-size: 10px; }
+.corpus-button { width: 100%; color: inherit; text-align: left; cursor: pointer; transition: border-color 160ms ease, background 160ms ease; }
+.corpus-button:hover { border-color: #bec8b6; background: #fff; }
 .ready-dot { display: inline-block; width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: #829b72; box-shadow: 0 0 0 3px rgba(130, 155, 114, 0.12); }
 .recent-section { margin-top: 29px; }
 .rail-link { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 5px; border: 0; background: transparent; color: #60695f; font-size: 12px; text-align: left; cursor: pointer; }

@@ -38,15 +38,19 @@ export default function Page() {
         </button>
 
         <div className="rail-section">
-          <p className="rail-label">YOUR CORPUS</p>
-          <div className="corpus-entry">
+          <p className="rail-label">FAQs</p>
+          <button
+            className="corpus-entry corpus-button"
+            type="button"
+            onClick={() => setInput('Give me an overview of the Acme Widget API.')}
+          >
             <span className="corpus-glyph" aria-hidden="true">R</span>
             <span>
               <strong>API Field Guide</strong>
-              <small>11 documents · indexed</small>
+              <small>Overview · 11 documents</small>
             </span>
             <span className="ready-dot" aria-label="Index ready" />
-          </div>
+          </button>
         </div>
 
         <div className="rail-section recent-section">
