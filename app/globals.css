@@ -202,3 +202,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, summary:focus-visibl
 @media (prefers-reduced-motion: reduce) {
 	*, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* Rendered Markdown in assistant answers */
+.markdown-body { white-space: normal; }
+.markdown-body > :first-child { margin-top: 0; }
+.markdown-body > :last-child { margin-bottom: 0; }
+.markdown-body p { margin: 0 0 10px; }
+.markdown-body strong { color: var(--ink); font-weight: 650; }
+.markdown-body ol, .markdown-body ul { margin: 0 0 10px; padding-left: 20px; }
+.markdown-body ol { list-style: decimal; }
+.markdown-body ul { list-style: disc; }
+.markdown-body li { margin: 4px 0; }
+.markdown-body li > p { margin: 0 0 4px; }
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 { margin: 14px 0 6px; color: var(--ink); font-size: 14px; font-weight: 650; }
+.markdown-body code { padding: 1px 5px; border-radius: 4px; background: #edf0e8; color: var(--sage-dark); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+.markdown-body pre { margin: 0 0 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: #f0f1e9; overflow-x: auto; }
+.markdown-body pre code { padding: 0; background: none; white-space: pre; }
+.markdown-body a { color: var(--sage-dark); text-decoration: underline; }

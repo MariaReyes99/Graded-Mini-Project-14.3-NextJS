@@ -1,6 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
+import ReactMarkdown from 'react-markdown';
 
 type Source = { text?: string; source?: string; document?: string; section?: string; score?: number };
 
@@ -117,7 +118,13 @@ export default function Page() {
                   {message.role === 'assistant' && <span className="assistant-mark">AG</span>}
                   <div className="message-content">
                     <span className="message-speaker">{message.role === 'user' ? 'YOU' : 'FIELD GUIDE'}</span>
-                    <div className="message-bubble">{message.content}</div>
+                    {message.role === 'assistant' ? (
+                      <div className="message-bubble markdown-body">
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div className="message-bubble">{message.content}</div>
+                    )}
                     {message.role === 'assistant' &&
                       message.toolInvocations?.map(
                         (invocation) =>
