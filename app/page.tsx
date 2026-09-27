@@ -2,7 +2,13 @@
 
 import { useChat } from '@ai-sdk/react';
 
-type Source = { text?: string; source?: string; section?: string; score?: number };
+type Source = { text?: string; source?: string; document?: string; section?: string; score?: number };
+
+const SCOPE_LABELS: Record<string, string> = {
+  acme: 'Acme docs',
+  standards: 'Standards',
+  both: 'Acme docs + standards',
+};
 
 export default function Page() {
   const { messages, input, setInput, setMessages, handleInputChange, handleSubmit, status, error } = useChat({
@@ -13,6 +19,7 @@ export default function Page() {
     'How does OAuth2 authentication work?',
     'What limits apply to API keys?',
     'How should I handle a 429 response?',
+    'What does the OAuth 2.0 standard say about the client credentials grant?',
   ];
 
   return (
@@ -47,7 +54,7 @@ export default function Page() {
             <span className="corpus-glyph" aria-hidden="true">R</span>
             <span>
               <strong>API Field Guide</strong>
-              <small>Overview · 11 documents</small>
+              <small>Overview · 18 documents</small>
             </span>
             <span className="ready-dot" aria-label="Index ready" />
           </button>
@@ -63,7 +70,7 @@ export default function Page() {
               onClick={() => setInput(question)}
             >
               <span className="rail-link-index">0{index + 1}</span>
-              {['Authentication', 'Rate limits', 'Error handling'][index]}
+              {['Authentication', 'Rate limits', 'Error handling', 'Standards'][index]}
             </button>
           ))}
         </div>
@@ -77,7 +84,7 @@ export default function Page() {
       <section className="guide-workspace" id="top">
         <header className="workspace-bar">
           <div className="breadcrumb"><span>REFERENCE DESK</span><b>/</b> API DOCUMENTATION</div>
-          <div className="source-count"><span className="ready-dot" /> 11 SOURCES INDEXED</div>
+          <div className="source-count"><span className="ready-dot" /> 18 SOURCES INDEXED</div>
         </header>
 
         <div className="conversation-column">
@@ -117,10 +124,16 @@ export default function Page() {
                           invocation.state === 'result' &&
                           invocation.toolName === 'getInformation' && (
                             <details className="source-disclosure" key={invocation.toolCallId}>
-                              <summary>Sources <span>{(invocation.result as Source[]).length}</span></summary>
+                              <summary>
+                                Sources
+                                {SCOPE_LABELS[(invocation.args as { scope?: string })?.scope ?? ''] && (
+                                  <> · {SCOPE_LABELS[(invocation.args as { scope?: string }).scope as string]}</>
+                                )}{' '}
+                                <span>{(invocation.result as Source[]).length}</span>
+                              </summary>
                               <ul className="source-list">
                                 {(invocation.result as Source[]).map((source, index) => (
-                                  <li className="source-item" key={`${source.source}-${index}`}>
+                                  <li className="source-item" key={`${source.source}-${index}`} title={source.document || undefined}>
                                     <span className="source-meta">
                                       {source.source ?? 'Unknown source'} <b>/</b> {source.section ?? 'Unlabeled section'}
                                       <span className="source-score">
